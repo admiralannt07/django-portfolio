@@ -38,7 +38,7 @@ Before you begin, ensure you have the following installed:
     Open your terminal (Git Bash recommended for Windows) and clone the project to your desired directory:
 
     ```bash
-    git clone <YOUR_REPOSITORY_URL>
+    git clone https://github.com/admiralannt07/django-portfolio.git
     cd portfolio
     ```
 
