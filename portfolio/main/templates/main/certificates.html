@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Certificates | {{ profile.name }}{% endblock %}
+
+{% block content %}
+    <!-- Certificates Header -->
+    <section class="pt-32 pb-16 bg-dark relative">
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-darker to-dark/50 z-0"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="text-center" data-aos="fade-up">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">My <span class="gradient-text">Certificates</span></h1>
+                <div class="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto"></div>
+                <p class="text-gray-400 mt-6 max-w-2xl mx-auto">
+                    A collection of my professional certifications and achievements in web development, design, and related technologies.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters -->
+    {% if all_issuers %}
+    <section class="py-8 bg-darker">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{% url 'certificates' %}" class="px-4 py-2 rounded-full border {% if not current_issuer %}border-primary bg-primary/10 text-primary{% else %}border-gray-600 text-gray-400 hover:border-primary/50 hover:text-primary{% endif %} transition-all duration-300">
+                    All
+                </a>
+                {% for issuer in all_issuers %}
+                <a href="{% url 'certificates' %}?issuer={{ issuer }}" class="px-4 py-2 rounded-full border {% if current_issuer == issuer %}border-primary bg-primary/10 text-primary{% else %}border-gray-600 text-gray-400 hover:border-primary/50 hover:text-primary{% endif %} transition-all duration-300">
+                    {{ issuer }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Certificates Grid -->
+    <section class="py-16 bg-darker relative">
+        <div class="absolute bottom-0 right-0 w-1/3 h-1/3 bg-primary/5 blur-3xl rounded-full"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            {% if certificates %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for certificate in certificates %}
+                <div class="group" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
+                    <div class="bg-dark rounded-lg overflow-hidden border border-primary/20 hover:border-primary/50 transition-all duration-500 h-full flex flex-col">
+                        <div class="relative overflow-hidden">
+                            {% if certificate.image %}
+                                <img src="{{ certificate.image.url }}" alt="{{ certificate.title }}" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110">
+                            {% else %}
+                                <div class="w-full h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-primary mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                                        </svg>
+                                        <p class="text-primary font-medium">Certificate</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end">
+                                <div class="p-4">
+                                    <div class="flex space-x-2">
+                                        <span class="bg-primary/20 text-primary text-xs px-2 py-1 rounded">{{ certificate.issuer }}</span>
+                                        <span class="bg-secondary/20 text-secondary text-xs px-2 py-1 rounded">{{ certificate.issue_date.year }}</span>
+                                        {% if certificate.is_expired %}
+                                        <span class="bg-red-500/20 text-red-400 text-xs px-2 py-1 rounded">Expired</span>
+                                        {% elif certificate.expiry_date %}
+                                        <span class="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded">Valid</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="text-xl font-bold mb-2 text-white group-hover:text-primary transition-colors duration-300">{{ certificate.title }}</h3>
+                            <p class="text-primary font-medium mb-2">{{ certificate.issuer }}</p>
+                            <p class="text-gray-400 text-sm mb-3">
+                                Issued: {{ certificate.issue_date|date:"F Y" }}
+                                {% if certificate.expiry_date %}
+                                <br>Expires: {{ certificate.expiry_date|date:"F Y" }}
+                                {% endif %}
+                            </p>
+                            {% if certificate.description %}
+                            <p class="text-gray-400 mb-4 flex-grow">{{ certificate.description|truncatewords:20 }}</p>
+                            {% endif %}
+                            
+                            {% if certificate.skills.all %}
+                            <div class="mb-4">
+                                <div class="flex flex-wrap gap-1">
+                                    {% for skill in certificate.skills.all|slice:":3" %}
+                                    <span class="skill-tag" data-skill-color="{{ skill.color }}">{{ skill.name }}</span>
+                                    {% endfor %}
+                                    {% if certificate.skills.count > 3 %}
+                                    <span class="text-gray-400 text-xs px-2 py-1">+{{ certificate.skills.count|add:"-3" }} more</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if certificate.credential_url %}
+                            <div class="mt-auto pt-4 border-t border-gray-800">
+                                <div class="flex justify-between items-center">
+                                    <a href="{{ certificate.credential_url }}" target="_blank" class="text-primary hover:text-secondary transition-colors duration-300">View Credential</a>
+                                    <a href="{{ certificate.credential_url }}" target="_blank" class="text-gray-400 hover:text-white transition-colors duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if certificates.has_other_pages %}
+            <div class="mt-16 flex justify-center" data-aos="fade-up">
+                <div class="flex space-x-2">
+                    {% if certificates.has_previous %}
+                    <a href="?page={{ certificates.previous_page_number }}{% if current_issuer %}&issuer={{ current_issuer }}{% endif %}" class="bg-dark px-4 py-2 rounded-md border border-primary/30 text-primary hover:bg-primary/10 transition-all duration-300">
+                        Previous
+                    </a>
+                    {% endif %}
+                    
+                    {% for num in certificates.paginator.page_range %}
+                        {% if certificates.number == num %}
+                        <span class="bg-primary/10 px-4 py-2 rounded-md border border-primary text-primary">{{ num }}</span>
+                        {% elif num > certificates.number|add:'-3' and num < certificates.number|add:'3' %}
+                        <a href="?page={{ num }}{% if current_issuer %}&issuer={{ current_issuer }}{% endif %}" class="bg-dark px-4 py-2 rounded-md border border-gray-700 text-gray-400 hover:border-primary/30 hover:text-primary transition-all duration-300">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if certificates.has_next %}
+                    <a href="?page={{ certificates.next_page_number }}{% if current_issuer %}&issuer={{ current_issuer }}{% endif %}" class="bg-dark px-4 py-2 rounded-md border border-primary/30 text-primary hover:bg-primary/10 transition-all duration-300">
+                        Next
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto text-gray-600 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+                <h3 class="text-2xl font-bold text-gray-400 mb-4">No Certificates Yet</h3>
+                <p class="text-gray-500 max-w-md mx-auto">
+                    {% if current_issuer %}
+                    No certificates found from {{ current_issuer }}. Try browsing all certificates or check back later.
+                    {% else %}
+                    Certificates will be displayed here once they are added. Check back soon!
+                    {% endif %}
+                </p>
+                {% if current_issuer %}
+                <div class="mt-6">
+                    <a href="{% url 'certificates' %}" class="inline-block bg-transparent py-3 px-8 rounded-md border border-primary hover:bg-primary/10 transition-all duration-300 text-primary">
+                        View All Certificates
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

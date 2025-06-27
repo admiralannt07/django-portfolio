@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Blog | {{ profile.name }}{% endblock %}
+
+{% block content %}
+    <!-- Blog Header -->
+    <section class="pt-32 pb-16 bg-dark relative">
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-darker to-dark/50 z-0"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="text-center" data-aos="fade-up">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">My <span class="gradient-text">Blog</span></h1>
+                <div class="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto"></div>
+                <p class="text-gray-400 mt-6 max-w-2xl mx-auto">
+                    Thoughts, tutorials, and insights about web development, design, and technology.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search and Filters -->
+    <section class="py-8 bg-darker">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
+                <!-- Search -->
+                <form method="get" class="flex-1 max-w-md">
+                    <div class="relative">
+                        <input type="text" name="search" value="{{ search_query|default:'' }}" placeholder="Search posts..." class="w-full bg-dark border border-primary/30 focus:border-primary/70 rounded-md px-4 py-3 pl-10 text-white focus:outline-none focus:ring-1 focus:ring-primary/50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    {% if current_category %}
+                    <input type="hidden" name="category" value="{{ current_category }}">
+                    {% endif %}
+                </form>
+                
+                <!-- Category Filters -->
+                {% if categories %}
+                <div class="flex flex-wrap gap-2">
+                    <a href="{% url 'blog' %}{% if search_query %}?search={{ search_query }}{% endif %}" class="px-4 py-2 rounded-full border {% if not current_category %}border-primary bg-primary/10 text-primary{% else %}border-gray-600 text-gray-400 hover:border-primary/50 hover:text-primary{% endif %} transition-all duration-300">
+                        All
+                    </a>
+                    {% for category in categories %}
+                    <a href="{% url 'blog' %}?category={{ category.slug }}{% if search_query %}&search={{ search_query }}{% endif %}" class="category-badge px-4 py-2 rounded-full border {% if current_category == category.slug %}border-primary bg-primary/10 text-primary{% else %}border-gray-600 text-gray-400 hover:border-primary/50 hover:text-primary{% endif %} transition-all duration-300" data-category-color="{{ category.color }}">
+                        {{ category.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Post -->
+    {% if featured_post %}
+    <section class="py-16 bg-darker relative">
+        <div class="absolute top-0 right-0 w-1/3 h-1/3 bg-primary/5 blur-3xl rounded-full"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="mb-16" data-aos="fade-up">
+                <div class="bg-dark rounded-lg overflow-hidden border border-primary/20 hover:border-primary/50 transition-all duration-500 group">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                        <div class="relative overflow-hidden">
+                            {% if featured_post.featured_image %}
+                                <img src="{{ featured_post.featured_image.url }}" alt="{{ featured_post.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            {% else %}
+                                <div class="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center min-h-[300px]">
+                                    <div class="text-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-primary mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                                        </svg>
+                                        <p class="text-primary font-medium">Featured Post</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        </div>
+                        <div class="p-8 flex flex-col justify-center">
+                            <div class="flex items-center mb-4">
+                                <span class="bg-primary/20 text-primary text-xs px-3 py-1 rounded-full">Featured</span>
+                                <span class="mx-2 text-gray-500">•</span>
+                                <span class="text-gray-400 text-sm">{{ featured_post.published_at|date:"F j, Y" }}</span>
+                                {% if featured_post.category %}
+                                <span class="mx-2 text-gray-500">•</span>
+                                <span class="category-badge text-xs px-2 py-1 rounded" data-category-color="{{ featured_post.category.color }}">{{ featured_post.category.name }}</span>
+                                {% endif %}
+                            </div>
+                            <h2 class="text-2xl md:text-3xl font-bold mb-4 text-white group-hover:text-primary transition-colors duration-300">{{ featured_post.title }}</h2>
+                            <p class="text-gray-400 mb-6">{{ featured_post.excerpt }}</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {{ featured_post.read_time }} min read
+                                    <span class="mx-2">•</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    {{ featured_post.views }} views
+                                </div>
+                                <a href="{% url 'blog_detail' featured_post.slug %}" class="inline-flex items-center text-primary hover:text-secondary transition-colors duration-300">
+                                    Read More
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Blog Posts Grid -->
+    <section class="py-16 bg-darker relative">
+        <div class="absolute bottom-0 left-0 w-1/3 h-1/3 bg-secondary/5 blur-3xl rounded-full"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            {% if posts %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for post in posts %}
+                <div class="group" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
+                    <div class="bg-dark rounded-lg overflow-hidden border border-primary/20 hover:border-primary/50 transition-all duration-500 h-full flex flex-col">
+                        <div class="relative overflow-hidden">
+                            {% if post.featured_image %}
+                                <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110">
+                            {% else %}
+                                <div class="w-full h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-primary mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                                        </svg>
+                                        <p class="text-primary text-sm">Blog Post</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <div class="flex items-center mb-3">
+                                {% if post.category %}
+                                <span class="category-badge text-xs px-2 py-1 rounded" data-category-color="{{ post.category.color }}">{{ post.category.name }}</span>
+                                <span class="mx-2 text-gray-500">•</span>
+                                {% endif %}
+                                <span class="text-gray-400 text-xs">{{ post.published_at|date:"F j, Y" }}</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-white group-hover:text-primary transition-colors duration-300">{{ post.title }}</h3>
+                            <p class="text-gray-400 mb-4 flex-grow">{{ post.excerpt }}</p>
+                            
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {{ post.read_time }} min read
+                                </div>
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    {{ post.views }}
+                                </div>
+                            </div>
+                            
+                            {% if post.tags.all %}
+                            <div class="mb-4">
+                                <div class="flex flex-wrap gap-1">
+                                    {% for tag in post.tags.all|slice:":3" %}
+                                    <span class="bg-secondary/10 text-secondary text-xs px-2 py-1 rounded">#{{ tag.name }}</span>
+                                    {% endfor %}
+                                    {% if post.tags.count > 3 %}
+                                    <span class="text-gray-400 text-xs px-2 py-1">+{{ post.tags.count|add:"-3" }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mt-auto pt-4 border-t border-gray-800">
+                                <a href="{% url 'blog_detail' post.slug %}" class="inline-flex items-center text-primary hover:text-secondary transition-colors duration-300">
+                                    Read More
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if posts.has_other_pages %}
+            <div class="mt-16 flex justify-center" data-aos="fade-up">
+                <div class="flex space-x-2">
+                    {% if posts.has_previous %}
+                    <a href="?page={{ posts.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="bg-dark px-4 py-2 rounded-md border border-primary/30 text-primary hover:bg-primary/10 transition-all duration-300">
+                        Previous
+                    </a>
+                    {% endif %}
+                    
+                    {% for num in posts.paginator.page_range %}
+                        {% if posts.number == num %}
+                        <span class="bg-primary/10 px-4 py-2 rounded-md border border-primary text-primary">{{ num }}</span>
+                        {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+                        <a href="?page={{ num }}{% if current_category %}&category={{ current_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="bg-dark px-4 py-2 rounded-md border border-gray-700 text-gray-400 hover:border-primary/30 hover:text-primary transition-all duration-300">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if posts.has_next %}
+                    <a href="?page={{ posts.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="bg-dark px-4 py-2 rounded-md border border-primary/30 text-primary hover:bg-primary/10 transition-all duration-300">
+                        Next
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto text-gray-600 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                </svg>
+                <h3 class="text-2xl font-bold text-gray-400 mb-4">No Blog Posts Yet</h3>
+                <p class="text-gray-500 max-w-md mx-auto">
+                    {% if search_query %}
+                    No posts found for "{{ search_query }}". Try a different search term or browse all posts.
+                    {% elif current_category %}
+                    No posts found in this category. Try browsing all posts or check back later.
+                    {% else %}
+                    Blog posts will be displayed here once they are published. Check back soon for insights and tutorials!
+                    {% endif %}
+                </p>
+                {% if search_query or current_category %}
+                <div class="mt-6">
+                    <a href="{% url 'blog' %}" class="inline-block bg-transparent py-3 px-8 rounded-md border border-primary hover:bg-primary/10 transition-all duration-300 text-primary">
+                        View All Posts
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

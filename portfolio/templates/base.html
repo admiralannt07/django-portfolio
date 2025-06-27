@@ -1,0 +1,309 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ profile.name }} | {{ profile.title }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{{ profile.meta_description|default:'Portfolio of a Front-end Engineer and Designer' }}{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}{{ profile.meta_keywords|default:'web development, frontend, design, portfolio' }}{% endblock %}">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3b82f6', // Blue
+                        'secondary': '#9333ea', // Purple
+                        'dark': '#0a0a0a',
+                        'darker': '#050505',
+                    },
+                    fontFamily: {
+                        'cyber': ['Space Grotesk', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0a0a0a;
+            font-family: 'Space Grotesk', sans-serif;
+            cursor: none;
+            overflow-x: hidden;
+        }
+        
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+        }
+        
+        .cursor-follower {
+            width: 8px;
+            height: 8px;
+            background-color: #9333ea;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            transition: 0.1s ease;
+        }
+        
+        .hover-effect {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #9333ea);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .neon-border {
+            position: relative;
+        }
+        
+        .neon-border::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #3b82f6, #9333ea, #3b82f6);
+            z-index: -1;
+            border-radius: 0.5rem;
+            animation: border-animation 3s linear infinite;
+        }
+        
+        @keyframes border-animation {
+            0% {
+                filter: blur(2px);
+                opacity: 0.3;
+            }
+            50% {
+                filter: blur(7px);
+                opacity: 1;
+            }
+            100% {
+                filter: blur(2px);
+                opacity: 0.3;
+            }
+        }
+        
+        .grid-background {
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        .glow {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), 0 0 30px rgba(147, 51, 234, 0.3);
+        }
+        
+        .skill-pill:hover {
+            box-shadow: 0 0 15px #3b82f6, 0 0 30px rgba(147, 51, 234, 0.5);
+            transform: translateY(-5px);
+        }
+
+        /* Dynamic color classes */
+        .skill-bar {
+            background: linear-gradient(to right, #3b82f6, #9333ea);
+            height: 10px;
+            border-radius: 5px;
+            transition: width 0.8s ease-in-out;
+        }
+
+        .category-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .skill-tag {
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+        }
+
+        .skill-tag:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="text-white">
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-darker/80 backdrop-blur-md border-b border-primary/20">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="{% url 'home' %}" class="text-2xl font-bold gradient-text">DEV<span class="text-secondary">.</span>FOLIO</a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="{% url 'home' %}#home" class="hover:text-primary transition-colors duration-300 cursor-pointer">Home</a>
+                    <a href="{% url 'home' %}#about" class="hover:text-primary transition-colors duration-300 cursor-pointer">About</a>
+                    <a href="{% url 'home' %}#skills" class="hover:text-primary transition-colors duration-300 cursor-pointer">Skills</a>
+                    <a href="{% url 'home' %}#projects" class="hover:text-primary transition-colors duration-300 cursor-pointer">Projects</a>
+                    <a href="{% url 'certificates' %}" class="hover:text-primary transition-colors duration-300 cursor-pointer">Certificates</a>
+                    <a href="{% url 'blog' %}" class="hover:text-primary transition-colors duration-300 cursor-pointer">Blog</a>
+                    <a href="{% url 'home' %}#contact" class="hover:text-primary transition-colors duration-300 cursor-pointer">Contact</a>
+                </div>
+                <button class="md:hidden focus:outline-none" id="mobile-menu-button">
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+            <!-- Mobile Menu -->
+            <div class="md:hidden hidden" id="mobile-menu">
+                <div class="flex flex-col space-y-4 mt-4 pb-4">
+                    <a href="{% url 'home' %}#home" class="hover:text-primary transition-colors duration-300">Home</a>
+                    <a href="{% url 'home' %}#about" class="hover:text-primary transition-colors duration-300">About</a>
+                    <a href="{% url 'home' %}#skills" class="hover:text-primary transition-colors duration-300">Skills</a>
+                    <a href="{% url 'home' %}#projects" class="hover:text-primary transition-colors duration-300">Projects</a>
+                    <a href="{% url 'certificates' %}" class="hover:text-primary transition-colors duration-300">Certificates</a>
+                    <a href="{% url 'blog' %}" class="hover:text-primary transition-colors duration-300">Blog</a>
+                    <a href="{% url 'home' %}#contact" class="hover:text-primary transition-colors duration-300">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    <footer class="py-8 bg-darker border-t border-primary/10">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <a href="{% url 'home' %}" class="text-2xl font-bold gradient-text">DEV<span class="text-secondary">.</span>FOLIO</a>
+                </div>
+                
+                <div class="text-gray-400 text-center md:text-right">
+                    <p>&copy; {% now "Y" %} {{ profile.name }}. All rights reserved.</p>
+                    <p class="text-sm mt-1">Designed and built with <span class="text-secondary">PASSION</span></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+        
+        // Custom cursor
+        document.addEventListener('DOMContentLoaded', () => {
+            const cursor = document.querySelector('.cursor');
+            const cursorFollower = document.querySelector('.cursor-follower');
+            
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+                
+                setTimeout(() => {
+                    cursorFollower.style.left = e.clientX + 'px';
+                    cursorFollower.style.top = e.clientY + 'px';
+                }, 50);
+            });
+            
+            const links = document.querySelectorAll('a, button');
+            links.forEach(link => {
+                link.addEventListener('mouseenter', () => {
+                    cursor.classList.add('hover-effect');
+                });
+                link.addEventListener('mouseleave', () => {
+                    cursor.classList.remove('hover-effect');
+                });
+            });
+            
+            // Hide cursor when leaving window
+            document.addEventListener('mouseleave', () => {
+                cursor.style.display = 'none';
+                cursorFollower.style.display = 'none';
+            });
+            
+            document.addEventListener('mouseenter', () => {
+                cursor.style.display = 'block';
+                cursorFollower.style.display = 'block';
+            });
+
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Apply dynamic colors to elements
+            applyDynamicColors();
+        });
+
+        // Function to apply dynamic colors
+        function applyDynamicColors() {
+            // Apply skill bar widths
+            document.querySelectorAll('[data-skill-width]').forEach(bar => {
+                const width = bar.getAttribute('data-skill-width');
+                setTimeout(() => {
+                    bar.style.width = width + '%';
+                }, 500);
+            });
+
+            // Apply category colors
+            document.querySelectorAll('[data-category-color]').forEach(element => {
+                const color = element.getAttribute('data-category-color');
+                element.style.backgroundColor = color + '20';
+                element.style.color = color;
+                element.style.borderColor = color + '30';
+            });
+
+            // Apply skill colors
+            document.querySelectorAll('[data-skill-color]').forEach(element => {
+                const color = element.getAttribute('data-skill-color');
+                element.style.backgroundColor = color + '10';
+                element.style.color = color;
+                element.style.borderColor = color + '30';
+            });
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

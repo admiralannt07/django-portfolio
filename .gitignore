@@ -1,0 +1,16 @@
+# Virtual environment
+myenv/
+
+# Django specific files
+db.sqlite3
+/media/
+
+# Byte-code files
+*.pyc
+__pycache__/
+
+# IDE specific files (if any, e.g., VS Code)
+.vscode/
+
+# Environment variables file (if you use one, e.g., .env)
+.env
