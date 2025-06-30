@@ -16,7 +16,7 @@ Welcome to my personal portfolio project, built with the powerful Django framewo
 *   **Backend**: Python, Django
 *   **Database**: SQLite (default, easily configurable for PostgreSQL/MySQL)
 *   **Frontend**: HTML5, CSS3, JavaScript
-*   **Styling**: Custom CSS (and potentially a CSS framework if integrated)
+*   **Styling**: Custom CSS and Tailwind CSS
 *   **Version Control**: Git
 
 ## ⚙️ Local Installation Guide
@@ -38,7 +38,7 @@ Before you begin, ensure you have the following installed:
     Open your terminal (Git Bash recommended for Windows) and clone the project to your desired directory:
 
     ```bash
-    git clone <YOUR_REPOSITORY_URL>
+    git clone https://github.com/admiralannt07/django-portfolio.git
     cd portfolio
     ```
 
