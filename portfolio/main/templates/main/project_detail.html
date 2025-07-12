@@ -1,0 +1,672 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ project.title }} | {{ profile.name }}{% endblock %}
+
+{% block meta_description %}{{ project.description }}{% endblock %}
+
+{% block meta_keywords %}{{ project.technologies.all|join:", " }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .project-content {
+        line-height: 1.8;
+    }
+    
+    .project-content h1, .project-content h2, .project-content h3, .project-content h4, .project-content h5, .project-content h6 {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    .project-content h1 { font-size: 2.25rem; }
+    .project-content h2 { font-size: 1.875rem; }
+    .project-content h3 { font-size: 1.5rem; }
+    .project-content h4 { font-size: 1.25rem; }
+    
+    .project-content p {
+        margin-bottom: 1.5rem;
+        color: #d1d5db;
+    }
+    
+    .project-content ul, .project-content ol {
+        margin-bottom: 1.5rem;
+        padding-left: 2rem;
+    }
+    
+    .project-content li {
+        margin-bottom: 0.5rem;
+        color: #d1d5db;
+    }
+    
+    .project-content blockquote {
+        border-left: 4px solid #3b82f6;
+        padding-left: 1.5rem;
+        margin: 2rem 0;
+        font-style: italic;
+        color: #9ca3af;
+        background: rgba(59, 130, 246, 0.05);
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+    }
+    
+    .project-content code {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+    }
+    
+    .project-content pre {
+        background: #1f2937;
+        color: #f9fafb;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        margin: 1.5rem 0;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .project-content pre code {
+        background: none;
+        color: inherit;
+        padding: 0;
+    }
+    
+    .project-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 2rem 0;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .project-content a {
+        color: #3b82f6;
+        text-decoration: underline;
+        transition: color 0.3s ease;
+    }
+    
+    .project-content a:hover {
+        color: #9333ea;
+    }
+
+    .tech-tag {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        color: #3b82f6;
+        padding: 8px 16px;
+        border-radius: 9999px;
+        transition: all 0.3s ease;
+        display: inline-block;
+        margin: 4px;
+    }
+
+    .tech-tag:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        background: rgba(59, 130, 246, 0.2);
+    }
+
+    .project-image-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+
+    .project-image-gallery img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+
+    .project-image-gallery img:hover {
+        transform: scale(1.05);
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: capitalize;
+    }
+
+    .status-published {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-draft {
+        background: rgba(251, 191, 36, 0.1);
+        color: #fbbf24;
+        border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .status-archived {
+        background: rgba(156, 163, 175, 0.1);
+        color: #9ca3af;
+        border: 1px solid rgba(156, 163, 175, 0.3);
+    }
+
+    .project-stats {
+        background: rgba(15, 23, 42, 0.5);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 1rem;
+        padding: 2rem;
+    }
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 2px solid;
+    }
+
+    .action-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        border-color: #3b82f6;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        border-color: #9333ea;
+        color: #9333ea;
+    }
+
+    .btn-secondary:hover {
+        background: rgba(147, 51, 234, 0.1);
+        box-shadow: 0 8px 25px rgba(147, 51, 234, 0.3);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border-color: rgba(255, 255, 255, 0.2);
+        color: #d1d5db;
+    }
+
+    .btn-outline:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .feature-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .feature-list li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        color: #d1d5db;
+    }
+
+    .feature-list li::before {
+        content: '✓';
+        color: #22c55e;
+        font-weight: bold;
+        margin-right: 0.75rem;
+        background: rgba(34, 197, 94, 0.1);
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+    }
+
+    .image-modal {
+        display: none;
+        position: fixed;
+        z-index: 10000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(5px);
+    }
+
+    .image-modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 90%;
+        max-height: 90%;
+    }
+
+    .image-modal img {
+        width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+    }
+
+    .image-modal-close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: white;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 10001;
+    }
+
+    .image-modal-close:hover {
+        color: #3b82f6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    {% if project %}
+    <!-- Project Header -->
+    <section class="pt-32 pb-16 bg-dark relative">
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-darker to-dark/50 z-0"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="max-w-6xl mx-auto">
+                <!-- Breadcrumb -->
+                <nav class="mb-8" data-aos="fade-up">
+                    <div class="flex items-center space-x-2 text-sm text-gray-400">
+                        <a href="{% url 'home' %}" class="hover:text-primary transition-colors duration-300">Home</a>
+                        <span>/</span>
+                        <a href="{% url 'projects' %}" class="hover:text-primary transition-colors duration-300">Projects</a>
+                        <span>/</span>
+                        <span class="text-gray-300">{{ project.title|truncatewords:3 }}</span>
+                    </div>
+                </nav>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    <!-- Main Content -->
+                    <div class="lg:col-span-2">
+                        <!-- Project Title & Status -->
+                        <div class="mb-8" data-aos="fade-up">
+                            <div class="flex flex-wrap items-center gap-4 mb-4">
+                                <span class="status-badge status-{{ project.status }}">{{ project.status }}</span>
+                                {% if project.is_featured %}
+                                <span class="bg-gradient-to-r from-primary to-secondary text-white px-3 py-1 rounded-full text-sm font-medium">
+                                    ⭐ Featured
+                                </span>
+                                {% endif %}
+                            </div>
+                            <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white leading-tight">
+                                {{ project.title }}
+                            </h1>
+                            <p class="text-xl text-gray-300 leading-relaxed">
+                                {{ project.description }}
+                            </p>
+                        </div>
+
+                        <!-- Project Image -->
+                        {% if project.image %}
+                        <div class="mb-8" data-aos="fade-up" data-aos-delay="100">
+                            <div class="relative overflow-hidden rounded-lg border border-primary/20 group cursor-pointer" onclick="openImageModal('{{ project.image.url }}')">
+                                <img src="{{ project.image.url }}" alt="{{ project.title }}" class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105">
+                                <div class="absolute inset-0 bg-gradient-to-t from-dark/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                                    <div class="bg-primary/20 backdrop-blur-sm rounded-full p-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Technologies Used -->
+                        {% if project.technologies.all %}
+                        <div class="mb-8" data-aos="fade-up" data-aos-delay="200">
+                            <h3 class="text-2xl font-bold mb-4 text-primary">Technologies Used</h3>
+                            <div class="flex flex-wrap gap-2">
+                                {% for tech in project.technologies.all %}
+                                <span class="tech-tag">{{ tech.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Detailed Description -->
+                        {% if project.detailed_description %}
+                        <div class="mb-8" data-aos="fade-up" data-aos-delay="300">
+                            <h3 class="text-2xl font-bold mb-6 text-primary">Project Details</h3>
+                            <div class="bg-dark/50 backdrop-blur-sm rounded-lg border border-primary/10 p-8">
+                                <div class="project-content prose prose-lg max-w-none">
+                                    {{ project.detailed_description|safe }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Key Features (if detailed description contains features) -->
+                        <div class="mb-8" data-aos="fade-up" data-aos-delay="400">
+                            <h3 class="text-2xl font-bold mb-6 text-secondary">Key Features</h3>
+                            <div class="bg-darker/50 backdrop-blur-sm rounded-lg border border-secondary/10 p-8">
+                                <ul class="feature-list">
+                                    <li>Responsive design that works on all devices</li>
+                                    <li>Modern and clean user interface</li>
+                                    <li>Optimized performance and fast loading times</li>
+                                    <li>Cross-browser compatibility</li>
+                                    <li>SEO-friendly structure and markup</li>
+                                    {% if project.technologies.all %}
+                                    <li>Built with cutting-edge technologies: {{ project.technologies.all|join:", " }}</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <div class="lg:col-span-1">
+                        <!-- Project Stats -->
+                        <div class="project-stats mb-8" data-aos="fade-up" data-aos-delay="100">
+                            <h3 class="text-xl font-bold mb-6 text-white">Project Info</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400">Status:</span>
+                                    <span class="status-badge status-{{ project.status }}">{{ project.status }}</span>
+                                </div>
+                                
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400">Created:</span>
+                                    <span class="text-white">{{ project.created_at|date:"F Y" }}</span>
+                                </div>
+                                
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400">Last Updated:</span>
+                                    <span class="text-white">{{ project.updated_at|date:"M j, Y" }}</span>
+                                </div>
+                                
+                                {% if project.technologies.all %}
+                                <div class="pt-4 border-t border-gray-700">
+                                    <span class="text-gray-400 block mb-2">Tech Stack:</span>
+                                    <div class="flex flex-wrap gap-1">
+                                        {% for tech in project.technologies.all|slice:":5" %}
+                                        <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">{{ tech.name }}</span>
+                                        {% endfor %}
+                                        {% if project.technologies.count > 5 %}
+                                        <span class="text-gray-400 text-xs px-2 py-1">+{{ project.technologies.count|add:"-5" }} more</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="space-y-4 mb-8" data-aos="fade-up" data-aos-delay="200">
+                            {% if project.demo_url %}
+                            <a href="{{ project.demo_url }}" target="_blank" class="action-button btn-primary w-full justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                                View Live Demo
+                            </a>
+                            {% endif %}
+                            
+                            {% if project.github_url %}
+                            <a href="{{ project.github_url }}" target="_blank" class="action-button btn-secondary w-full justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                                </svg>
+                                View Source Code
+                            </a>
+                            {% endif %}
+                            
+                            <button onclick="shareProject()" class="action-button btn-outline w-full justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                                </svg>
+                                Share Project
+                            </button>
+                        </div>
+
+                        <!-- Contact CTA -->
+                        <div class="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg border border-primary/20 p-6" data-aos="fade-up" data-aos-delay="300">
+                            <h4 class="text-lg font-bold mb-3 text-white">Interested in Similar Work?</h4>
+                            <p class="text-gray-300 text-sm mb-4">
+                                I'd love to discuss your project ideas and see how I can help bring them to life.
+                            </p>
+                            <a href="{% url 'home' %}#contact" class="action-button btn-primary w-full justify-center text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Get In Touch
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Projects -->
+    {% if related_projects %}
+    <section class="py-16 bg-darker relative">
+        <div class="absolute bottom-0 left-0 w-1/3 h-1/3 bg-secondary/5 blur-3xl rounded-full"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-12" data-aos="fade-up">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Related <span class="gradient-text">Projects</span></h2>
+                    <div class="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {% for related_project in related_projects %}
+                    <div class="group" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
+                        <div class="bg-dark rounded-lg overflow-hidden border border-primary/20 hover:border-primary/50 transition-all duration-500 h-full flex flex-col">
+                            <div class="relative overflow-hidden">
+                                {% if related_project.image %}
+                                    <img src="{{ related_project.image.url }}" alt="{{ related_project.title }}" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110">
+                                {% else %}
+                                    <div class="w-full h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-primary mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                            </svg>
+                                            <p class="text-primary text-sm">Project</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end">
+                                    <div class="p-4">
+                                        <div class="flex space-x-2">
+                                            {% for tech in related_project.technologies.all|slice:":3" %}
+                                            <span class="bg-primary/20 text-primary text-xs px-2 py-1 rounded">{{ tech.name }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h3 class="text-lg font-bold mb-3 text-white group-hover:text-primary transition-colors duration-300">{{ related_project.title }}</h3>
+                                <p class="text-gray-400 mb-4 flex-grow text-sm">{{ related_project.description|truncatewords:15 }}</p>
+                                
+                                <div class="mt-auto pt-4 border-t border-gray-800">
+                                    <div class="flex justify-between items-center">
+                                        <a href="{% url 'project_detail' related_project.slug %}" class="text-primary hover:text-secondary transition-colors duration-300 text-sm">
+                                            View Project
+                                        </a>
+                                        {% if related_project.demo_url %}
+                                        <a href="{{ related_project.demo_url }}" target="_blank" class="text-gray-400 hover:text-white transition-colors duration-300">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Back to Projects -->
+                <div class="text-center mt-12" data-aos="fade-up">
+                    <a href="{% url 'projects' %}" class="inline-block bg-transparent py-3 px-8 rounded-md border border-primary hover:bg-primary/10 transition-all duration-300 text-primary">
+                        ← Back to Projects
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Navigation -->
+    <section class="py-8 bg-dark border-t border-gray-800">
+        <div class="container mx-auto px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex justify-between items-center">
+                    <a href="{% url 'projects' %}" class="inline-flex items-center text-gray-400 hover:text-primary transition-colors duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        All Projects
+                    </a>
+                    
+                    <div class="flex space-x-4">
+                        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="text-gray-400 hover:text-primary transition-colors duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="image-modal">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <div class="image-modal-content">
+            <img id="modalImage" src="/placeholder.svg" alt="">
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Project Not Found -->
+    <section class="pt-32 pb-16 bg-dark relative min-h-screen flex items-center">
+        <div class="container mx-auto px-6 text-center">
+            <div class="max-w-2xl mx-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto text-gray-600 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <h1 class="text-4xl font-bold text-gray-400 mb-4">Project Not Found</h1>
+                <p class="text-gray-500 mb-8">The project you're looking for doesn't exist or has been removed.</p>
+                <a href="{% url 'projects' %}" class="inline-block bg-transparent py-3 px-8 rounded-md border border-primary hover:bg-primary/10 transition-all duration-300 text-primary">
+                    Back to Projects
+                </a>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Image modal functionality
+    function openImageModal(imageSrc) {
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        modal.style.display = 'block';
+        modalImg.src = imageSrc;
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeImageModal() {
+        const modal = document.getElementById('imageModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modal when clicking outside the image
+    document.getElementById('imageModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeImageModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeImageModal();
+        }
+    });
+
+    // Share project function
+    function shareProject() {
+        const url = window.location.href;
+        const title = document.querySelector('h1').textContent;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: title,
+                url: url
+            }).catch(console.error);
+        } else {
+            // Fallback to copying URL
+            navigator.clipboard.writeText(url).then(() => {
+                // Show temporary notification
+                const button = event.target.closest('button');
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Link Copied!';
+                button.classList.add('btn-primary');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                    button.classList.remove('btn-primary');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+    }
+
+    // Apply dynamic colors when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        applyDynamicColors();
+    });
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
